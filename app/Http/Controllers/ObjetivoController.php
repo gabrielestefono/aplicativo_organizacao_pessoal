@@ -12,7 +12,8 @@ class ObjetivoController extends Controller
      */
     public function index()
     {
-        //
+        $objetivo = Objetivo::all();
+        return response()->json($objetivo, 200);
     }
 
     /**
@@ -20,7 +21,21 @@ class ObjetivoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate(
+            [
+                'objetivo' => 'required|string',
+                'descricao' => 'required|string',
+                'concluido' => 'boolean',
+                'arquivado' => 'boolean',
+                'prioridade' => 'integer',
+                'parent_id' => 'integer',
+                'user_id' => 'required|exists:users,id',
+            ]
+        );
+
+        $objetivo = Objetivo::create($request->all());
+
+        return response()->json($objetivo, 201);
     }
 
     /**
@@ -28,7 +43,8 @@ class ObjetivoController extends Controller
      */
     public function show(Objetivo $objetivo)
     {
-        //
+        $objetivo = Objetivo::find($objetivo);
+        return response()->json($objetivo, 200);
     }
 
     /**
@@ -36,7 +52,21 @@ class ObjetivoController extends Controller
      */
     public function update(Request $request, Objetivo $objetivo)
     {
-        //
+        $request->validate(
+            [
+                'objetivo' => 'required|string',
+                'descricao' => 'required|string',
+                'concluido' => 'boolean',
+                'arquivado' => 'boolean',
+                'prioridade' => 'integer',
+                'parent_id' => 'integer',
+                'user_id' => 'required|exists:users,id',
+            ]
+        );
+
+        $objetivo->update($request->all());
+
+        return response()->json($objetivo, 200);
     }
 
     /**
@@ -44,6 +74,7 @@ class ObjetivoController extends Controller
      */
     public function destroy(Objetivo $objetivo)
     {
-        //
+        $objetivo->delete();
+        return response()->json(null, 204);
     }
 }

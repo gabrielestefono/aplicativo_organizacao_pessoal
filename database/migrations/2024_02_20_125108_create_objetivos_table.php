@@ -13,7 +13,15 @@ return new class extends Migration
     {
         Schema::create('objetivos', function (Blueprint $table) {
             $table->id();
+            $table->string('objetivo');
+            $table->text('descricao');
+            $table->boolean('concluido')->default(false);
+            $table->boolean('arquivado')->default(false);
+            $table->integer('prioridade')->default(0);
+            $table->unsignedBigInteger('parent_id')->default(0);
+            $table->foreignId('user_id')->constrained();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
