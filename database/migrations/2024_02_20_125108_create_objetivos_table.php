@@ -19,7 +19,8 @@ return new class extends Migration
             $table->boolean('arquivado')->default(false);
             $table->integer('prioridade')->default(0);
             $table->unsignedBigInteger('parent_id')->default(0);
-            $table->foreignId('user_id')->constrained();
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users');
             $table->timestamps();
             $table->softDeletes();
         });
