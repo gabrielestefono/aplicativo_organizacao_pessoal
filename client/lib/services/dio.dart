@@ -1,6 +1,7 @@
 import 'package:client/classes/objetivo.dart';
 import 'package:client/classes/objetivos.dart';
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DioService {
   DioService._();
@@ -13,36 +14,34 @@ class DioService {
 
   final Dio _dio = Dio();
   late String? _token;
-  final String _url = 'http://192.168.0.105:8000/api/';
+  final String _url = 'https://webestcoding.com.br/api/';
 
-  // Variáveis temporárias
-  final String _email = 'gabrielestefono@hotmail.com';
-  final String _senha = '12345678';
-  final String _nome = 'Gabriel Estefono';
-
-  Future<void> login() async {
+  Future<void> login(email, senha) async {
     try {
       Response response = await _dio.post(
         '${_url}login',
         data: {
-          'email': _email,
-          'password': _senha,
+          'email': email,
+          'password': senha,
         },
       );
-      _token = response.data['token'];
+      String _token = response.data['token'];
+      getObjetivos();
+      saveToken(_token);
     } on DioError catch (error) {
-      // Retornar para a tela de login
+      print("Errrrrrrrou");
+      print(error);
     }
   }
 
-  Future<void> registrar() async {
+  Future<void> registrar(email, senha, nome) async {
     try {
       Response response = await _dio.post(
         '${_url}registrar',
         data: {
-          'email': _email,
-          'password': _senha,
-          'name': _nome,
+          'email': email,
+          'password': senha,
+          'name': nome,
         },
       );
 
@@ -74,5 +73,27 @@ class DioService {
       // avisar o usuário que ocorreu um erro
       print(error);
     }
+  }
+
+  Future<String> getToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    if (token != null) {
+      _token = token;
+      getObjetivos();
+      return token;
+    } else {
+      return '';
+    }
+  }
+
+  Future<void> saveToken(String token) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', token).then((value) => print(_token));
+  }
+
+  Future<void> removeToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
   }
 }

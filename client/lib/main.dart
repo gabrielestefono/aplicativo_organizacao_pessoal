@@ -1,4 +1,6 @@
 import 'package:client/pages/dashboard.dart';
+import 'package:client/pages/login.dart';
+import 'package:client/services/dio.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -13,6 +15,10 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  void fazerLogin() {
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
@@ -20,8 +26,23 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Dashboard(),
+    return MaterialApp(
+      home: FutureBuilder<String>(
+        future: DioService().getToken(),
+        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasError) {
+              return Text('Erro: ${snapshot.error}');
+            } else if (snapshot.data == '') {
+              return Login(fazerLogin);
+            } else {
+              return const Dashboard();
+            }
+          } else {
+            return const CircularProgressIndicator();
+          }
+        },
+      ),
     );
   }
 }
