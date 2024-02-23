@@ -17,11 +17,12 @@ class _LoginState extends State<Login> {
   String _senha = "";
 
   void tentarLogin() {
-    setState(() {
-      _logginIn = true;
-    });
+    debugPrint("Tentando login");
     if (_formKey.currentState!.validate()) {
-      DioService().login(_email, _senha).then((_) => widget.fazerLogin());
+      debugPrint(_email);
+      debugPrint(_senha);
+      debugPrint(_formKey.currentState!.validate() ? "Valido" : "Invalid");
+      DioService().login(_email, _senha);
     }
   }
 
