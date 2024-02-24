@@ -1,5 +1,4 @@
 import 'package:client/classes/objetivo.dart';
-import 'package:client/classes/objetivos.dart';
 import 'package:client/pages/app_bar.dart';
 import 'package:client/services/dio.dart';
 import 'package:flutter/material.dart';
@@ -12,31 +11,16 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  String _controladorTexto = '';
   List<Objetivo> objetivos = [];
 
   @override
   void initState() {
     super.initState();
-    setaEstado();
-    DioService().removeToken();
-  }
-
-  Future<void> loadObjetivos() async {
-    objetivos = Objetivos().objetivos;
-  }
-
-  Future<void> setaEstado() async {
-    loadObjetivos().then(
-      (value) => setState(() {
-        objetivos = objetivos;
-        debugPrint(objetivos[0].descricao);
-      }),
-    );
-  }
-
-  Future<void> login() async {
-    // await DioService().login();
+    DioService().getObjetivos().then((value) => {
+          setState(() {
+            objetivos = value;
+          })
+        });
   }
 
   @override

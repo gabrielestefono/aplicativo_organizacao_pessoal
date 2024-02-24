@@ -19,10 +19,21 @@ class _LoginState extends State<Login> {
   void tentarLogin() {
     debugPrint("Tentando login");
     if (_formKey.currentState!.validate()) {
-      debugPrint(_email);
-      debugPrint(_senha);
-      debugPrint(_formKey.currentState!.validate() ? "Valido" : "Invalid");
-      DioService().login(_email, _senha);
+      setState(() {
+        _logginIn = true;
+      });
+      DioService().login(_email, _senha).then((resultado) => {
+            if (resultado)
+              {
+                widget.fazerLogin(),
+              }
+            else
+              {
+                setState(() {
+                  _logginIn = false;
+                }),
+              }
+          });
     }
   }
 
