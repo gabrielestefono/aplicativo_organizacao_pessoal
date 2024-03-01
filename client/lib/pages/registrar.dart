@@ -1,37 +1,35 @@
 import 'package:client/pages/app_bar.dart';
-import 'package:client/pages/registrar.dart';
 import 'package:client/services/dio.dart';
 import 'package:flutter/material.dart';
 
-class Login extends StatefulWidget {
-  final VoidCallback fazerLogin;
-  const Login(this.fazerLogin, {super.key});
+class Registrar extends StatefulWidget {
+  const Registrar({super.key});
 
   @override
-  State<Login> createState() => _LoginState();
+  State<Registrar> createState() => _RegistrarState();
 }
 
-class _LoginState extends State<Login> {
-  bool _logginIn = false;
+class _RegistrarState extends State<Registrar> {
+  bool _registrando = false;
   final _formKey = GlobalKey<FormState>();
+  String _nome = "";
   String _email = "";
   String _senha = "";
+  String _senhaConfirmacao = "";
 
-  void tentarLogin() {
-    debugPrint("Tentando login");
+  void tentarRegistrar() {
+    debugPrint("Tentando Registrar");
     if (_formKey.currentState!.validate()) {
       setState(() {
-        _logginIn = true;
+        _registrando = true;
       });
-      DioService().login(_email, _senha).then((resultado) => {
+      DioService().registrar(_nome, _email, _senha, _senhaConfirmacao).then((resultado) => {
             if (resultado)
-              {
-                widget.fazerLogin(),
-              }
+              {Navigator.pop(context)}
             else
               {
                 setState(() {
-                  _logginIn = false;
+                  _registrando = false;
                 }),
               }
           });
@@ -46,7 +44,7 @@ class _LoginState extends State<Login> {
         width: MediaQuery.of(context).size.height - 80,
         decoration: const BoxDecoration(color: Color(0xFF333333)),
         child: Center(
-          child: !_logginIn
+          child: !_registrando
               ? Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -60,10 +58,10 @@ class _LoginState extends State<Login> {
                               clipBehavior: Clip.none,
                               child: TextFormField(
                                 validator: (value) {
-                                  if (value == null || value.isEmpty || !RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$').hasMatch(value)) {
-                                    return 'Por favor, insira um email válido';
+                                  if (value == null || value.isEmpty) {
+                                    return "O campo deve ser preenchido!";
                                   }
-                                  _email = value;
+                                  _nome = value;
                                   return null;
                                 },
                                 keyboardType: TextInputType.emailAddress,
@@ -73,7 +71,7 @@ class _LoginState extends State<Login> {
                                   contentPadding: EdgeInsets.symmetric(vertical: 10.0),
                                   filled: true,
                                   fillColor: Color(0xFF444444),
-                                  hintText: "Email",
+                                  hintText: "Nome",
                                   hintStyle: TextStyle(
                                     color: Color(0xFF808080),
                                   ),
@@ -88,8 +86,37 @@ class _LoginState extends State<Login> {
                                 clipBehavior: Clip.none,
                                 child: TextFormField(
                                   validator: (value) {
+                                    if (value == null || value.isEmpty || !RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$').hasMatch(value)) {
+                                      return "Por favor, insira um email válido!";
+                                    }
+                                    _email = value;
+                                    return null;
+                                  },
+                                  keyboardType: TextInputType.emailAddress,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(color: Color(0xFFFFFFFF)),
+                                  decoration: const InputDecoration(
+                                    contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                                    filled: true,
+                                    fillColor: Color(0xFF444444),
+                                    hintText: "Email",
+                                    hintStyle: TextStyle(
+                                      color: Color(0xFF808080),
+                                    ),
+                                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              margin: const EdgeInsets.only(top: 20),
+                              child: Container(
+                                width: 250,
+                                clipBehavior: Clip.none,
+                                child: TextFormField(
+                                  validator: (value) {
                                     if (value == null || value.isEmpty) {
-                                      return 'O campo senha deve ser preenchido';
+                                      return 'O campo deve ser preenchido';
                                     }
                                     _senha = value;
                                     return null;
@@ -102,6 +129,35 @@ class _LoginState extends State<Login> {
                                     filled: true,
                                     fillColor: Color(0xFF444444),
                                     hintText: "Senha",
+                                    hintStyle: TextStyle(
+                                      color: Color(0xFF808080),
+                                    ),
+                                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              margin: const EdgeInsets.only(top: 20),
+                              child: Container(
+                                width: 250,
+                                clipBehavior: Clip.none,
+                                child: TextFormField(
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'O campo deve ser preenchido';
+                                    }
+                                    _senhaConfirmacao = value;
+                                    return null;
+                                  },
+                                  obscureText: true,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(color: Color(0xFFFFFFFF)),
+                                  decoration: const InputDecoration(
+                                    contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                                    filled: true,
+                                    fillColor: Color(0xFF444444),
+                                    hintText: "Confirmação de Senha",
                                     hintStyle: TextStyle(
                                       color: Color(0xFF808080),
                                     ),
@@ -129,39 +185,12 @@ class _LoginState extends State<Login> {
                             ),
                           ),
                         ),
-                        onPressed: tentarLogin,
+                        onPressed: tentarRegistrar,
                         child: const Text(
                           style: TextStyle(
                             color: Color(0xFFFFFFFF),
                           ),
-                          'Login',
-                        ),
-                      ),
-                    ),
-                    Container(
-                      height: 50,
-                      width: 200,
-                      margin: const EdgeInsets.only(top: 20),
-                      child: ElevatedButton(
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
-                          elevation: MaterialStateProperty.all(0),
-                          padding: const MaterialStatePropertyAll(EdgeInsets.zero),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const Registrar(),
-                            ),
-                          );
-                        },
-                        child: const Text(
-                          'Não possui uma conta? Registre-se',
-                          style: TextStyle(
-                            color: Color(0xFFFFFFFF),
-                          ),
-                          textAlign: TextAlign.center,
+                          'Registrar',
                         ),
                       ),
                     ),

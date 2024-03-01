@@ -16,12 +16,9 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   void fazerLogin() {
-    setState(() {});
-  }
-
-  @override
-  void initState() {
-    super.initState();
+    setState(() {
+      // Só atualiza o estado, não faz mais nada
+    });
   }
 
   @override
@@ -32,6 +29,7 @@ class _MyAppState extends State<MyApp> {
         builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.hasError) {
+              // TODO: Finalizar o app em caso de erro
               return Text('Erro: ${snapshot.error}');
             } else if (snapshot.data == '') {
               return Login(fazerLogin);
