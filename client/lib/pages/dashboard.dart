@@ -2,6 +2,7 @@ import 'package:client/classes/objetivo.dart';
 import 'package:client/classes/objetivos.dart';
 import 'package:client/pages/app_bar.dart';
 import 'package:client/pages/criar_objetivo.dart';
+import 'package:client/pages/objetivo_detalhe.dart';
 import 'package:client/services/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -16,7 +17,8 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   List<Objetivo> objetivos = [];
   late int? _id;
-  List<double> _heightPorId = [];
+  final Map<int, double> _heightPorId = {};
+  bool retornou = false;
   String _nome = "";
   final _formKey = GlobalKey<FormState>();
 
@@ -35,14 +37,18 @@ class _DashboardState extends State<Dashboard> {
                 () {
                   Objetivos().objetivos = value;
                   objetivos = value.where((e) => e.parentId == _id).toList();
-                  _heightPorId = List.generate(Objetivos().objetivos.length, (index) => 0);
+                  for (var objetivo in Objetivos().objetivos) {
+                    _heightPorId[objetivo.id] = 0.0;
+                  }
                 },
               ),
             },
           );
     } else {
       objetivos = Objetivos().objetivos.where((e) => e.parentId == _id).toList();
-      _heightPorId = List.generate(Objetivos().objetivos.length, (index) => 0);
+      for (var objetivo in Objetivos().objetivos) {
+        _heightPorId[objetivo.id] = 0.0;
+      }
     }
   }
 
@@ -60,7 +66,11 @@ class _DashboardState extends State<Dashboard> {
         _heightPorId[id] = 200;
       });
     }
-    return _heightPorId[id];
+    return _heightPorId[id]!;
+  }
+
+  void atualizarEdicao() {
+    pegarObjetivos(true);
   }
 
   @override
@@ -130,7 +140,7 @@ class _DashboardState extends State<Dashboard> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => CriarObjetivo(_nome, _id ?? 0, 1, null),
+                                  builder: (context) => CriarObjetivo(_nome, _id ?? 0, 1, null, null, null),
                                 ),
                               ).then((value) {
                                 pegarObjetivos(true);
@@ -243,7 +253,7 @@ class _DashboardState extends State<Dashboard> {
                                               if (temFilhos(objetivo)) {
                                                 Navigator.push(context, MaterialPageRoute(builder: (context) => Dashboard(id: objetivo.id)));
                                               } else {
-                                                // Navigator.push(context, MaterialPageRoute(builder: (context) => ObjetivoDetalhe(objetivo)));
+                                                Navigator.push(context, MaterialPageRoute(builder: (context) => ObjetivoDetalhe(objetivo)));
                                               }
                                             },
                                             child: Text(
@@ -259,13 +269,10 @@ class _DashboardState extends State<Dashboard> {
                                           width: 50,
                                           child: ElevatedButton(
                                             onPressed: () {
-                                              //TODO: Abrir página de criação/edição de objetivo
-                                              //TODO: Enviar id do objetivo para a página
-                                              //TODO: Enviar dados para uma requisição de edição
                                               Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
-                                                  builder: (context) => CriarObjetivo(objetivo.objetivo, objetivo.parentId, 1, objetivo),
+                                                  builder: (context) => CriarObjetivo(objetivo.objetivo, objetivo.parentId, 1, objetivo, atualizarEdicao, null),
                                                 ),
                                               );
                                             },
@@ -286,8 +293,41 @@ class _DashboardState extends State<Dashboard> {
                                           margin: const EdgeInsets.only(right: 10),
                                           child: ElevatedButton(
                                             onPressed: () {
-                                              //TODO: Fazer modal de confirmação
-                                              //TODO: Enviar requisição de deleção
+                                              showDialog(
+                                                context: context,
+                                                builder: (BuildContext context) {
+                                                  return AlertDialog(
+                                                    title: const Text('Confirme!'),
+                                                    content: const Text('Tem certeza que deseja apagar o objetivo?'),
+                                                    actions: <Widget>[
+                                                      TextButton(
+                                                        child: const Text('Cancelar'),
+                                                        onPressed: () {
+                                                          Navigator.of(context).pop();
+                                                        },
+                                                      ),
+                                                      TextButton(
+                                                        child: const Text('Apagar'),
+                                                        onPressed: () {
+                                                          DioService().deletarObjetivo(objetivo.id).then(
+                                                                (value) => {
+                                                                  if (value)
+                                                                    {
+                                                                      setState(
+                                                                        () {
+                                                                          pegarObjetivos(true);
+                                                                          Navigator.of(context).pop();
+                                                                        },
+                                                                      )
+                                                                    }
+                                                                },
+                                                              );
+                                                        },
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              );
                                             },
                                             style: ButtonStyle(
                                               padding: MaterialStateProperty.all(EdgeInsets.zero),
@@ -320,8 +360,6 @@ class _DashboardState extends State<Dashboard> {
                                             mainAxisAlignment: MainAxisAlignment.start,
                                             children: _heightPorId[objetivo.id] == 200
                                                 ? [
-                                                    // TODO: Ajustar o espaçamento entre os textos
-                                                    // TODO: Ajustar a largura do texto de objetivo.objetivo
                                                     SizedBox(
                                                       width: MediaQuery.of(context).size.width - 40,
                                                       child: Text(

@@ -8,7 +8,9 @@ class CriarObjetivo extends StatefulWidget {
   final int parentId;
   final int userId;
   final Objetivo? objetivoAntigo;
-  const CriarObjetivo(this.objetivo, this.parentId, this.userId, this.objetivoAntigo, {super.key});
+  final Function? atualizarEdicao;
+  final Function? atualizar;
+  const CriarObjetivo(this.objetivo, this.parentId, this.userId, this.objetivoAntigo, this.atualizarEdicao, this.atualizar, {super.key});
 
   @override
   State<CriarObjetivo> createState() => _CriarObjetivoState();
@@ -33,6 +35,9 @@ class _CriarObjetivoState extends State<CriarObjetivo> {
         if (!alteracao) {
           DioService().criarObjetivo(_objetivo, _descricao, _prioridade, _concluido, _arquivado, _parentId, _userId).then((value) {
             if (value) {
+              if (widget.atualizar != null) {
+                widget.atualizar!();
+              }
               Navigator.pop(context);
             } else {
               setState(() {
@@ -43,6 +48,7 @@ class _CriarObjetivoState extends State<CriarObjetivo> {
         } else {
           DioService().atualizarObjetivo(widget.objetivoAntigo!.id, _objetivo, _descricao, _prioridade, _concluido, _arquivado, _parentId, _userId).then((value) {
             if (value) {
+              widget.atualizarEdicao!();
               Navigator.pop(context);
             } else {
               setState(() {

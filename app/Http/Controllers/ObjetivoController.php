@@ -147,7 +147,7 @@ class ObjetivoController extends Controller
         if (!$objetivo) {
             return response()->json('Objetivo não encontrado', 404);
         }elseif ($objetivo->trashed()) {
-            return response()->json('Objetivo já deletado', 404);
+            return response()->json('Objetivo já deletado', 200);
         }
 
         $objetivo->delete();

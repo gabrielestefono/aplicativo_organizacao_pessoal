@@ -228,6 +228,22 @@ class DioService {
     }
   }
 
+  ///
+  /// Método para atualizar um objetivo.
+  /// Primeiro ele faz a requisição PUT para a rota de objetivos.
+  /// Se a resposta for 200, ele retorna true.
+  /// Se ocorrer um erro, ele retorna false.
+  /// Se o token não existir, ele retorna false.
+  /// Se o token expirar, ele retorna false.
+  /// Se o token for inválido, ele retorna false.
+  /// TODO: Se o token for inválido, ele remove o token do SharedPreferences.
+  /// TODO: Retornar para a página de login.
+  /// TODO: Salvar o código de erro no atributo _erro.
+  /// TODO: Talvez, fecha a aplicação.
+  /// TODO: Mostrar modal de erro.
+  /// TODO: Salvar o código de erro no atributo _erro.
+  /// TODO: Talvez, fecha a aplicação.
+  ///
   Future<bool> atualizarObjetivo(int id, String objetivo, String descricao, int prioridade, bool concluido, bool arquivado, int parentId, int userId) async {
     try {
       Response response = await _dio.put(
@@ -261,6 +277,26 @@ class DioService {
     try {
       Response response = await _dio.patch(
         '${_url}objetivo-concluido/$id',
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $_token",
+          },
+        ),
+      );
+      if (response.statusCode == 200) {
+        return true;
+      }
+      return false;
+    } on DioError catch (error) {
+      debugPrint(error.message);
+      return false;
+    }
+  }
+
+  Future<bool> deletarObjetivo(id) async {
+    try {
+      Response response = await _dio.delete(
+        '${_url}objetivo/$id',
         options: Options(
           headers: {
             "Authorization": "Bearer $_token",
